@@ -424,8 +424,9 @@ elif pag == "Proyección":
 
 # ================================================================ INGRESOS
 elif pag == "Ingresos":
+    col_glosa = "coalesce(glosa,'') AS glosa" if MODO == "detalle" else "'' AS glosa"
     ing = q(f"""SELECT cc, proyecto, anio, mes, cod_sitm, des_item, cubeta_ingreso,
-                       coalesce(glosa,'') glosa, valor
+                       {col_glosa}, valor
                 FROM v_ingreso
                 WHERE cod_tipmov BETWEEN 10 AND 15
                   {"AND anio IN (" + ",".join(str(int(a)) for a in sel_anio) + ")" if sel_anio else ""}

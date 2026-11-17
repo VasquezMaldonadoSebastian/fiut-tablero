@@ -31,11 +31,12 @@ dst.execute("CREATE TABLE taxonomia AS SELECT * FROM org.taxonomia")
 # movimientos agregados: una fila por C.C. x mes x ítem, sin documento ni proveedor
 dst.execute("""
 CREATE TABLE movimientos AS
-SELECT cc, proyecto, proyecto_nombre, financiador_proyecto, anio, mes, cod_tipmov,
-       des_tipmov, cod_sitm, des_item, veredicto, rubro, subitem, etiqueta,
+SELECT m.cc, cp.proyecto, cp.proyecto_nombre, m.anio, m.mes, m.cod_tipmov, m.des_tipmov,
+       m.cod_sitm, m.des_item, m.veredicto, m.rubro, m.subitem, m.etiqueta, m.cubeta_ingreso,
        count(*) AS movimientos,
-       sum(valor) AS valor, sum(comprometido) AS comprometido, sum(pagado) AS pagado
-FROM org.v_egreso
+       sum(m.valor) AS valor, sum(m.comprometido) AS comprometido, sum(m.pagado) AS pagado
+FROM org.movimientos m
+LEFT JOIN org.cc_proyecto cp ON m.cc = cp.cc AND cp.rn = 1
 GROUP BY ALL
 """)
 
@@ -65,9 +66,11 @@ dst.execute("""
 CREATE VIEW v_egreso AS
 SELECT m.*, p.inicio, p.termino, p.adjudicado
 FROM movimientos m LEFT JOIN proyectos p ON m.proyecto = p.codigo
+WHERE m.cod_tipmov BETWEEN 20 AND 25
 """)
 dst.execute("CREATE VIEW v_gasto AS SELECT * FROM v_egreso WHERE veredicto = 'gasto'")
 dst.execute("CREATE VIEW v_paso AS SELECT * FROM v_egreso WHERE veredicto = 'paso'")
+dst.execute("CREATE VIEW v_ingreso AS SELECT * FROM movimientos WHERE cod_tipmov BETWEEN 10 AND 15")
 dst.execute("CREATE TABLE dim_proyecto AS SELECT * FROM proyectos")
 dst.execute("""
 CREATE TABLE meta AS
@@ -76,9 +79,15 @@ UNION ALL SELECT 'modo', 'share'
 UNION ALL SELECT 'corte', '16-11-2026'
 """)
 
-for t in ("proyectos", "movimientos", "declarado", "presupuesto_anid", "taxonomia"):
-    n = dst.execute(f"SELECT count(*) FROM {t}").fetchone()[0]
+for t in ("proyectos", "movimientos", "v_gasto", "v_paso", "v_ingreso", "declarado", "presupuesto_anid",
+          "taxonomia"):
+    n = dst.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
     print(f"{t}: {n:,}")
+
+g = dst.execute("SELECT sum(valor) FROM v_gasto").fetchone()[0]
+p = dst.execute("SELECT sum(valor) FROM v_paso").fetchone()[0]
+i = dst.execute("SELECT sum(valor) FROM v_ingreso").fetchone()[0]
+print(f"gasto {g/1e6:,.1f} MM · paso {p/1e6:,.1f} MM · ingresos {i/1e6:,.1f} MM")
 dst.close()
 
 print(f"{DEST.name}: {DEST.stat().st_size/1024/1024:.2f} MB")
