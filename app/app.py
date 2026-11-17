@@ -250,8 +250,7 @@ elif pag == "Registros":
         st.markdown(f'<div class="ct">Registros de gasto</div><div class="cs">una fila por movimiento · '
                     f'{len(gasto_f):,} filas con los filtros actuales</div>'.replace(",", "."),
                     unsafe_allow_html=True)
-        cols = ["fecha", "anio", "mes", "proyecto", "cc", "cod_sitm", "des_item", "rubro",
-                "subitem", "etiqueta", "glosa", "valor"]
+        cols = ["fecha", "anio", "proyecto", "cc", "cod_sitm", "des_item", "glosa", "rubro", "valor"]
         d = gasto_f[cols].sort_values("fecha", ascending=False).copy()
         d.insert(0, "n", range(1, len(d) + 1))
         st.dataframe(d, use_container_width=True, hide_index=True, height=560,
@@ -265,23 +264,24 @@ elif pag == "Registros":
                      })
     else:
         st.markdown('<div class="ct">Registros de gasto</div>'
-                    '<div class="cs">versión en línea: una fila por centro de costo, mes e ítem '
-                    '(sin documento, proveedor ni glosa)</div>', unsafe_allow_html=True)
-        d = (gasto_f.groupby(["anio", "mes", "proyecto", "cc", "cod_sitm", "des_item", "rubro",
-                              "subitem", "etiqueta"], as_index=False)
-             .agg(movimientos=("movimientos", "sum"), valor=("valor", "sum"))
-             .sort_values(["anio", "mes"], ascending=False))
+                    '<div class="cs">versión en línea: una fila por movimiento · sin RUT ni número '
+                    'de documento</div>', unsafe_allow_html=True)
+        w2 = W.replace("WHERE", "AND") if W else ""
+        d = q(f"""SELECT fecha, anio, proyecto, cc, cod_sitm, des_item, glosa, rubro, valor
+                   FROM mov_detalle WHERE veredicto = 'gasto' {w2}
+                   ORDER BY fecha DESC""", MTIME)
         st.dataframe(d, use_container_width=True, hide_index=True, height=560,
                      column_config={
+                         "fecha": st.column_config.DateColumn("Fecha", format="DD-MM-YYYY"),
                          "valor": st.column_config.NumberColumn("Monto ($)", format="localized"),
                          "anio": st.column_config.NumberColumn("Año", width="small"),
                          "mes": st.column_config.NumberColumn("Mes", width="small"),
                          "des_item": st.column_config.TextColumn("Ítem contable", width="medium"),
                          "rubro": st.column_config.TextColumn("Rubro", width="small"),
-                         "movimientos": st.column_config.NumberColumn("Movs.", width="small"),
+                         "glosa": st.column_config.TextColumn("Glosa", width="medium"),
                      })
     st.caption(f"Total filtrado: {clp(total_f)} · cuentas de paso excluidas: {clp(paso_f)} · "
-               f"modo {'detalle completo' if MODO == 'detalle' else 'agregado (en línea)'}")
+               f"modo {'detalle completo' if MODO == 'detalle' else 'en línea (sin RUT ni documento)'}")
 
 # ================================================================ PROYECTOS
 elif pag == "Proyectos":
@@ -424,10 +424,11 @@ elif pag == "Proyección":
 
 # ================================================================ INGRESOS
 elif pag == "Ingresos":
-    col_glosa = "coalesce(glosa,'') AS glosa" if MODO == "detalle" else "'' AS glosa"
+    tabla_ing = "v_ingreso" if MODO == "detalle" else "mov_detalle"
+    col_glosa = "coalesce(glosa,'') AS glosa" if MODO == "detalle" else "glosa"
     ing = q(f"""SELECT cc, proyecto, anio, mes, cod_sitm, des_item, cubeta_ingreso,
                        {col_glosa}, valor
-                FROM v_ingreso
+                FROM {tabla_ing}
                 WHERE cod_tipmov BETWEEN 10 AND 15
                   {"AND anio IN (" + ",".join(str(int(a)) for a in sel_anio) + ")" if sel_anio else ""}
                 """, MTIME)
@@ -518,9 +519,16 @@ st.sidebar.caption("Exporta lo que está filtrado en pantalla, con la reconcilia
 fname = (f"FIUT_{'-'.join(map(str, sel_anio)) or 'todos'}_"
          f"{'filtrado' if (sel_proy or sel_cc or sel_rubro) else 'cartera'}_"
          f"{date.today():%Y%m%d}.xlsx")
+if MODO == "detalle":
+    exp_gasto, exp_paso = gasto_f, q(f"SELECT * FROM v_paso{W}", MTIME)
+else:
+    w2 = W.replace("WHERE", "AND") if W else ""
+    exp_gasto = q(f"SELECT * FROM mov_detalle WHERE veredicto='gasto' {w2}", MTIME)
+    exp_paso = q(f"SELECT * FROM mov_detalle WHERE veredicto='paso' {w2}", MTIME)
+
 st.sidebar.download_button(
     "↓ Excel con filtros",
-    data=excel_bytes(gasto_f, q(f"SELECT * FROM v_paso{W}", MTIME),
+    data=excel_bytes(exp_gasto, exp_paso,
                      [("Año", sel_anio), ("Proyecto", sel_proy), ("Centro de costo", sel_cc),
                       ("Rubro", sel_rubro)],
                      q("SELECT * FROM taxonomia", MTIME), CORTE, VERSION_TAX,

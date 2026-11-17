@@ -40,6 +40,21 @@ LEFT JOIN org.cc_proyecto cp ON m.cc = cp.cc AND cp.rn = 1
 GROUP BY ALL
 """)
 
+# detalle por movimiento: sin RUT, sin número de documento, con glosa saneada
+dst.execute(r"""
+CREATE TABLE mov_detalle AS
+SELECT m.cc, cp.proyecto, m.fecha, m.anio, m.mes, m.cod_tipmov, m.des_tipmov,
+       m.cod_sitm, m.des_item, m.veredicto, m.rubro, m.subitem, m.etiqueta, m.cubeta_ingreso,
+       m.valor,
+       regexp_replace(
+         regexp_replace(
+           regexp_replace(coalesce(m.glosa,''), '\b\d{1,2}\.\d{3}\.\d{3}-[\dkK]\b', 'RUT', 'g'),
+           '\b\d{3,8}-[\dkK]\b', 'RUT', 'g'),
+         '[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+', 'correo', 'g') AS glosa
+FROM org.movimientos m
+LEFT JOIN org.cc_proyecto cp ON m.cc = cp.cc AND cp.rn = 1
+""")
+
 dst.execute("""
 CREATE TABLE declarado AS
 SELECT proyecto, anio, periodo, item, subitem, tipo_documento, inst_financiera, universo,
@@ -79,8 +94,8 @@ UNION ALL SELECT 'modo', 'share'
 UNION ALL SELECT 'corte', '16-11-2026'
 """)
 
-for t in ("proyectos", "movimientos", "v_gasto", "v_paso", "v_ingreso", "declarado", "presupuesto_anid",
-          "taxonomia"):
+for t in ("proyectos", "movimientos", "mov_detalle", "v_gasto", "v_paso", "v_ingreso", "declarado",
+          "presupuesto_anid", "taxonomia"):
     n = dst.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
     print(f"{t}: {n:,}")
 
