@@ -87,3 +87,8 @@ Para regenerar la base en línea después de un refresco:
 .venv\Scripts\python.exe etl\25_export_share.py
 git add data/share/fiu_fiut_share.duckdb && git commit -m "base en linea" && git push
 ```
+
+## Guía de uso
+
+`docs/GUIA_USO_TABLERO_FIUT.pdf` — dos láminas: cómo filtrar y agrupar, y cómo generar el Excel.
+Los originales están en `docs/LAMINA_1.png` y `docs/LAMINA_2.png`.

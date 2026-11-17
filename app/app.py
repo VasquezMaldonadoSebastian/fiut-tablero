@@ -105,7 +105,7 @@ st.markdown(f"""<div class="hero"><div class="brand"><div class="mark">FIU</div>
 libro Kullin y declaración ANID · corte {CORTE}</div></div></div>
 <div><span class="tag">equivalencia {VERSION_TAX}</span></div></div>""", unsafe_allow_html=True)
 
-f1, f2, f3, f4 = st.columns([1.1, 2.2, 2.0, 1.5])
+f1, f2, f3, f4, f5 = st.columns([1.1, 2.1, 1.9, 1.4, 0.8])
 anios = q("SELECT DISTINCT anio FROM v_egreso ORDER BY 1", MTIME)["anio"].tolist()
 sel_anio = f1.multiselect("Año", anios, default=anios, key="f_anio")
 sel_proy = f2.multiselect("Proyecto", sorted(proys["codigo"].tolist()), default=[], key="f_proy",
@@ -114,6 +114,19 @@ ccs = q("SELECT DISTINCT cc FROM v_egreso ORDER BY 1", MTIME)["cc"].tolist()
 sel_cc = f3.multiselect("Centro de costo", ccs, default=[], key="f_cc", placeholder="Todos los C.C.")
 sel_rubro = f4.multiselect("Rubro", rubros["rubro"].tolist(), default=[], key="f_rubro",
                            placeholder="Todos los rubros")
+
+
+def _limpiar():
+    st.session_state["f_anio"] = anios
+    st.session_state["f_proy"] = []
+    st.session_state["f_cc"] = []
+    st.session_state["f_rubro"] = []
+
+
+with f5:
+    st.markdown("<div style='height:26px'></div>", unsafe_allow_html=True)
+    st.button("Limpiar", on_click=_limpiar, use_container_width=True,
+              help="Vuelve a todos los años y sin filtros de proyecto, C.C. ni rubro")
 
 
 def clause():
