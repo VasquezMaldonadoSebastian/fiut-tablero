@@ -37,9 +37,9 @@ por año, ítems, detalle, cuentas de paso y tabla de equivalencia.
 
 ## Cifras del corte 16-11-2026
 
-- Registrado bruto en los 112 C.C.: **$23.413,0 MM** (egresos, tipos 20 a 25).
-- Cuentas de paso: **$9.658,2 MM** — no son gasto y se muestran aparte.
-- **Gasto clasificable: $13.754,8 MM** en 84 ítems contables.
+- Registrado bruto en los 115 C.C.: **$23.628,8 MM** (egresos, tipos 20 a 25).
+- Cuentas de paso: **$9.729,4 MM** — no son gasto y se muestran aparte.
+- **Gasto clasificable: $13.899,4 MM** en 84 ítems contables.
 - Declarado a ANID por los 61 proyectos con cartola: **$12.293,7 MM** en 13.791 líneas.
 
 ## Refrescar los datos

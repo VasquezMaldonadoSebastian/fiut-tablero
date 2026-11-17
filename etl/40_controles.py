@@ -25,12 +25,16 @@ sin = con.execute("SELECT count(*) FROM v_egreso WHERE veredicto = 'sin_clasific
 check("todo egreso clasificado", sin == 0, f"{sin} sin clasificar")
 
 n_cc = con.execute("SELECT count(DISTINCT cc) FROM movimientos").fetchone()[0]
-check("112 centro de costo con movimientos", n_cc == 112, f"{n_cc} C.C.")
+check("115 centros de costo con movimientos", n_cc == 115, f"{n_cc} C.C.")
 
 n_proy = con.execute("SELECT count(*) FROM proyectos").fetchone()[0]
 check("124 filas de proyecto", n_proy == 124, f"{n_proy} filas")
 
 huerf = con.execute("SELECT count(*) FROM v_egreso WHERE proyecto IS NULL").fetchone()[0]
+ing_tot = con.execute("SELECT sum(valor) FROM v_ingreso").fetchone()[0]
+ing_cub = con.execute("SELECT sum(s) FROM (SELECT sum(valor) s FROM v_ingreso GROUP BY cubeta_ingreso)").fetchone()[0]
+check("ingresos: cubetas = total", abs((ing_tot or 0) - (ing_cub or 0)) < 1,
+      f"{ing_tot:,.0f} vs {ing_cub:,.0f}")
 check("sin movimientos huérfanos de proyecto", huerf == 0, f"{huerf} filas")
 
 d_proy, d_monto, d_lineas = con.execute(

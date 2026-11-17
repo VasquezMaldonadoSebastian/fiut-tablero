@@ -55,7 +55,18 @@ with open(RAW / "proyectos.csv", "w", newline="", encoding="utf-8") as f:
     w.writeheader(); w.writerows(proys)
 print("proyectos:", len(proys), "| con C.C.:", sum(1 for p in proys if p["cc"]))
 
-ccs = sorted({p["cc"] for p in proys if p["cc"]})
+ccs = {p["cc"] for p in proys if p["cc"]}
+
+# centros de costo corregidos por acuerdo (no vienen en el paquete)
+CORR = Path(__file__).resolve().parent.parent / "data" / "correcciones_cc.csv"
+if CORR.exists():
+    with open(CORR, encoding="utf-8") as f:
+        for row in csv.DictReader(f, delimiter=";"):
+            c = norm_cc(row["cc"])
+            if c:
+                ccs.add(c)
+    print("correcciones de C.C. aplicadas:", len(ccs) - len({p["cc"] for p in proys if p["cc"]}))
+ccs = sorted(ccs)
 in_list = ",".join("'" + c + "'" for c in ccs)
 codigos = sorted({p["codigo"] for p in proys})
 cod_list = ",".join("'" + c.replace("'", "''") + "'" for c in codigos)

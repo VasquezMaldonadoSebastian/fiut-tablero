@@ -145,7 +145,7 @@ def clause():
 W = clause()
 
 # ---------------------------------------------------------------- navegación
-PAGINAS = ["Resumen", "Registros", "Proyectos", "Ítems", "Declarado", "Proyección", "Metodología"]
+PAGINAS = ["Resumen", "Registros", "Proyectos", "Ítems", "Declarado", "Proyección", "Ingresos", "Metodología"]
 pag = st.radio("Vista", PAGINAS, horizontal=True, label_visibility="collapsed")
 
 gasto_f = q(f"SELECT * FROM v_gasto{W}", MTIME)
@@ -421,13 +421,80 @@ elif pag == "Proyección":
                "habitual cuando hay contraparte o el C.C. concentra más de un proyecto; en esos casos la "
                "proyección no aplica y el riesgo se informa como tal.")
 
+
+# ================================================================ INGRESOS
+elif pag == "Ingresos":
+    ing = q(f"""SELECT cc, proyecto, anio, mes, cod_sitm, des_item, cubeta_ingreso,
+                       coalesce(glosa,'') glosa, valor
+                FROM v_ingreso
+                WHERE cod_tipmov BETWEEN 10 AND 15
+                  {"AND anio IN (" + ",".join(str(int(a)) for a in sel_anio) + ")" if sel_anio else ""}
+                """, MTIME)
+    if sel_proy:
+        ing = ing[ing["proyecto"].isin(sel_proy)]
+    if sel_cc:
+        ing = ing[ing["cc"].astype(str).isin(sel_cc)]
+
+    rem = float(ing.loc[ing["cubeta_ingreso"] == "Remesa", "valor"].sum())
+    arr = float(ing.loc[ing["cubeta_ingreso"] == "Saldo de arrastre", "valor"].sum())
+    otr = float(ing.loc[ing["cubeta_ingreso"] == "Otros ingresos", "valor"].sum())
+    tot = float(ing["valor"].sum())
+    st.markdown(kpis([
+        ("Remesas del período", f"${mm(rem)}", "ítems 21549, 21538, 21501, 21550", False),
+        ("Saldo de arrastre", f"${mm(arr)}", "ítem 29901 · no es ingreso del período", True),
+        ("Otros ingresos", f"${mm(otr)}", "ítem 25503 · sin clasificar por glosa", True),
+        ("Ingresos del período", f"${mm(tot - arr)}", f"{len(ing):,} movimientos".replace(",", "."), False),
+    ]), unsafe_allow_html=True)
+
+    c1, c2 = st.columns([1.5, 1])
+    with c1, st.container(border=True):
+        st.markdown('<div class="ct">Ingresos por año y tipo</div>'
+                    '<div class="cs">MM de pesos · según filtros</div>', unsafe_allow_html=True)
+        d = ing.groupby(["anio", "cubeta_ingreso"], as_index=False)["valor"].sum()
+        d["mm"] = d["valor"] / 1e6
+        orden = ["Remesa", "Otros ingresos", "Transferencias internas", "Devoluciones y ajustes",
+                 "Saldo de arrastre", "Otros"]
+        colores = ["#7FC4B8", "#E6C08C", "#A9B9E0", "#CBB6D6", "#C9CED4", "#DFE3E6"]
+        ch = (alt.Chart(d).mark_bar(cornerRadius=3).encode(
+            x=alt.X("anio:O", title=None),
+            y=alt.Y("mm:Q", title="MM de pesos", axis=alt.Axis(format=",.0f")),
+            color=alt.Color("cubeta_ingreso:N", sort=orden,
+                            scale=alt.Scale(domain=orden, range=colores), title=None),
+            tooltip=[alt.Tooltip("anio:O", title="Año"), alt.Tooltip("cubeta_ingreso:N", title="Tipo"),
+                     alt.Tooltip("valor:Q", title="Monto", format=",.0f")],
+        ).properties(height=320))
+        st.altair_chart(ch, use_container_width=True)
+
+    with c2, st.container(border=True):
+        st.markdown('<div class="ct">Remesas por proyecto</div><div class="cs">MM de pesos</div>',
+                    unsafe_allow_html=True)
+        r = (ing[ing["cubeta_ingreso"] == "Remesa"].groupby("proyecto", as_index=False)["valor"]
+             .sum().sort_values("valor", ascending=False).head(12))
+        r["mm"] = r["valor"] / 1e6
+        ch2 = (alt.Chart(r).mark_bar(cornerRadius=3, size=14, color="#7FC4B8").encode(
+            x=alt.X("mm:Q", title=None, axis=alt.Axis(format=",.0f", labels=False, grid=False)),
+            y=alt.Y("proyecto:N", sort="-x", title=None, axis=alt.Axis(labelLimit=150)),
+            tooltip=[alt.Tooltip("proyecto:N"), alt.Tooltip("valor:Q", format=",.0f")],
+        ).properties(height=340))
+        st.altair_chart(ch2, use_container_width=True)
+
+    st.markdown('<div class="ct" style="margin-top:14px">Detalle de ingresos</div>', unsafe_allow_html=True)
+    det = ing.sort_values(["anio", "mes"], ascending=False).copy()
+    st.dataframe(det, use_container_width=True, hide_index=True, height=340,
+                 column_config={"valor": st.column_config.NumberColumn("Monto ($)", format="localized"),
+                                "glosa": st.column_config.TextColumn("Glosa", width="medium"),
+                                "cubeta_ingreso": st.column_config.TextColumn("Tipo", width="small")})
+    st.caption("El saldo de arrastre (29901) no es ingreso del período: se muestra para cuadrar contra la caja. "
+               "«Otros ingresos» corresponde al ítem 25503, cuyas glosas son números de comprobante y no "
+               "permiten clasificar por concepto.")
+
 # ================================================================ METODOLOGÍA
 else:
     st.markdown(f"""
 <div class="card"><div class="ct">Cómo se calcula</div>
 <div class="cs" style="margin-bottom:10px">versión de la tabla de equivalencia: {VERSION_TAX}</div>
 <ul style="font-size:13px;color:#3D434B;line-height:1.75">
-<li><b>Universo:</b> los 124 proyectos del paquete FIUT y sus 112 centros de costo en FIN21.</li>
+<li><b>Universo:</b> los 124 proyectos del paquete FIUT y sus 115 centros de costo en FIN21, incluidas las tres correcciones de C.C. acordadas el 17-11-2026.</li>
 <li><b>Gasto:</b> movimientos de egreso (tipos 20 a 25) del libro Kullin, corte {CORTE}.</li>
 <li><b>Cuentas de paso:</b> 13 ítems que no son gasto (solicitud electrónica de compras, obligaciones
 pendientes, fondos por rendir, importaciones, transferencias internas, boletas de garantía, solicitudes de
