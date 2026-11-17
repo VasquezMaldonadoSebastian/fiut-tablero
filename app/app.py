@@ -37,7 +37,7 @@ st.markdown(f"""
            align-items:center;justify-content:center;font-weight:700;font-size:13px;letter-spacing:.5px; }}
   .h1 {{ font-size:19px;font-weight:650;color:{INK};line-height:1.2; }}
   .sub {{ font-size:12px;color:{MUTED};margin-top:3px; }}
-  .kpis {{ display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:6px 0 16px; }}
+  .kpis {{ display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:14px;margin:6px 0 16px; }}
   .k {{ background:#fff;border:1px solid {LINE};border-radius:11px;padding:15px 17px; }}
   .kl {{ font-size:10.5px;letter-spacing:.7px;text-transform:uppercase;color:#8B929A;font-weight:600; }}
   .kv {{ font-size:26px;font-weight:650;letter-spacing:-.6px;margin-top:7px;color:{INK};
@@ -232,9 +232,10 @@ elif pag == "Registros":
     st.dataframe(d, use_container_width=True, hide_index=True, height=560,
                  column_config={
                      "fecha": st.column_config.DateColumn("Fecha", format="DD-MM-YYYY"),
-                     "valor": st.column_config.NumberColumn("Monto", format="$%.0f"),
+                     "valor": st.column_config.NumberColumn("Monto ($)", format="localized"),
                      "cc": st.column_config.TextColumn("C.C."),
                      "des_item": st.column_config.TextColumn("Ítem contable", width="medium"),
+                     "rubro": st.column_config.TextColumn("Rubro", width="small"),
                      "glosa": st.column_config.TextColumn("Glosa", width="medium"),
                  })
     st.caption(f"Total filtrado: {clp(total_f)} · cuentas de paso excluidas: {clp(paso_f)}")
@@ -255,9 +256,9 @@ elif pag == "Proyectos":
         use_container_width=True, hide_index=True, height=520,
         column_config={
             "proyecto": "Código", "proyecto_nombre": "Proyecto", "financiador": "Financiador",
-            "adjudicado": st.column_config.NumberColumn("Adjudicado", format="$%.0f"),
-            "ejecutado": st.column_config.NumberColumn("Ejecutado", format="$%.0f"),
-            "saldo": st.column_config.NumberColumn("Saldo", format="$%.0f"),
+            "adjudicado": st.column_config.NumberColumn("Adjudicado ($)", format="localized"),
+            "ejecutado": st.column_config.NumberColumn("Ejecutado ($)", format="localized"),
+            "saldo": st.column_config.NumberColumn("Saldo ($)", format="localized"),
             "avance": st.column_config.ProgressColumn("Avance", format="%.0f%%", min_value=0, max_value=150),
             "movimientos": "Movs."})
 
@@ -279,7 +280,7 @@ elif pag == "Ítems":
         base.sort_values("monto", ascending=False),
         use_container_width=True, hide_index=True, height=560,
         column_config={"cod_sitm": "Ítem", "des_item": "Nombre", "rubro": "Rubro", "subitem": "Subítem",
-                       "monto": st.column_config.NumberColumn("Monto", format="$%.0f"),
+                       "monto": st.column_config.NumberColumn("Monto ($)", format="localized"),
                        "movimientos": "Movs.",
                        "pct": st.column_config.NumberColumn("%", format="%.1f%%"),
                        "acum": st.column_config.NumberColumn("% acum.", format="%.1f%%")})
@@ -312,29 +313,44 @@ elif pag == "Declarado":
                      use_container_width=True, hide_index=True, height=430,
                      column_config={
                          "proyecto": "Proyecto",
-                         "monto": st.column_config.NumberColumn("Declarado", format="$%.0f"),
-                         "valor": st.column_config.NumberColumn("Registrado", format="$%.0f"),
-                         "brecha": st.column_config.NumberColumn("Brecha", format="$%.0f")})
+                         "monto": st.column_config.NumberColumn("Declarado ($)", format="localized"),
+                         "valor": st.column_config.NumberColumn("Registrado ($)", format="localized"),
+                         "brecha": st.column_config.NumberColumn("Brecha ($)", format="localized")})
     st.caption("Solo proyectos con cartola ANID. El resto de la cartera no declara en ese portal.")
 
 # ================================================================ PROYECCIÓN
 elif pag == "Proyección":
     d = gasto_f.groupby(["proyecto", "anio", "mes"], as_index=False)["valor"].sum()
     d["f"] = pd.to_datetime(dict(year=d.anio, month=d.mes, day=1))
-    ult = d.groupby("proyecto", as_index=False).apply(
-        lambda x: x.sort_values("f").tail(6)["valor"].sum() / 6, include_groups=False)
-    ult.columns = ["proyecto", "prom6"]
+    ult = (d.sort_values("f").groupby("proyecto").tail(6)
+           .groupby("proyecto", as_index=False)["valor"].sum()
+           .rename(columns={"valor": "suma6"}))
+    ult["prom6"] = ult["suma6"] / 6
+    ult = ult[["proyecto", "prom6"]]
     tot = gasto_f.groupby("proyecto", as_index=False)["valor"].sum()
     p = tot.merge(ult, on="proyecto").merge(
         proys[["codigo", "adjudicado", "termino", "nombre"]], left_on="proyecto", right_on="codigo", how="left")
     p["prom6"] = p["prom6"].fillna(0)
-    p["meses_restantes"] = ((p["adjudicado"] - p["valor"]) / p["prom6"].replace(0, np.nan))
+    p["saldo"] = p["adjudicado"].fillna(0) - p["valor"]
+    p["meses_restantes"] = (p["saldo"] / p["prom6"].replace(0, np.nan)).where(p["saldo"] > 0)
     p["fecha_agota"] = pd.Timestamp(date.today()) + pd.to_timedelta(p["meses_restantes"] * 30.4, unit="D")
     p["termino"] = pd.to_datetime(p["termino"])
     p["brecha_meses"] = ((p["fecha_agota"] - p["termino"]).dt.days / 30.4)
     p["riesgo"] = np.select(
-        [p["prom6"] <= 0, p["brecha_meses"] < -3, p["brecha_meses"] < 0],
-        ["sin ejecución", "agota antes", "ajustado"], default="alcanza")
+        [p["adjudicado"].fillna(0) <= 0, p["saldo"] <= 0, p["prom6"] <= 0,
+         p["brecha_meses"] < -3, p["brecha_meses"] < 0],
+        ["sin monto", "sobreejecutado", "sin ejecución", "agota antes", "ajustado"], default="alcanza")
+    for c in ("adjudicado", "valor", "prom6", "saldo"):
+        p[c] = p[c].astype(float).round(0)
+    p["nombre"] = p["nombre"].fillna("—").str.slice(0, 46)
+    cnt = p["riesgo"].value_counts()
+    st.markdown(kpis([
+        ("Agotan antes", f"{int(cnt.get('agota antes', 0))}", "más de 3 meses antes del término", True),
+        ("Sobreejecutados", f"{int(cnt.get('sobreejecutado', 0))}", "gastaron más que lo adjudicado", True),
+        ("Ajustados", f"{int(cnt.get('ajustado', 0))}", "agotan dentro de los 3 meses previos", False),
+        ("Alcanzan", f"{int(cnt.get('alcanza', 0))}", "el saldo cubre hasta el término", False),
+        ("Sin ejecución", f"{int(cnt.get('sin ejecución', 0))}", "sin movimientos en 6 meses", True),
+    ]), unsafe_allow_html=True)
     st.markdown('<div class="ct">Proyección de ejecución</div>'
                 '<div class="cs">promedio de los últimos 6 meses con movimiento · fecha de agotamiento vs término</div>',
                 unsafe_allow_html=True)
@@ -343,16 +359,20 @@ elif pag == "Proyección":
             ["proyecto", "nombre", "adjudicado", "valor", "prom6", "fecha_agota", "termino", "brecha_meses", "riesgo"]],
         use_container_width=True, hide_index=True, height=520,
         column_config={
-            "proyecto": "Código", "nombre": "Proyecto",
-            "adjudicado": st.column_config.NumberColumn("Adjudicado", format="$%.0f"),
-            "valor": st.column_config.NumberColumn("Ejecutado", format="$%.0f"),
-            "prom6": st.column_config.NumberColumn("Prom. 6m", format="$%.0f"),
-            "fecha_agota": st.column_config.DateColumn("Agota", format="MM-YYYY"),
-            "termino": st.column_config.DateColumn("Término", format="MM-YYYY"),
-            "brecha_meses": st.column_config.NumberColumn("Brecha (meses)", format="%.1f"),
-            "riesgo": "Riesgo"})
+            "proyecto": st.column_config.TextColumn("Código", width="small"),
+            "nombre": st.column_config.TextColumn("Proyecto", width="medium"),
+            "adjudicado": st.column_config.NumberColumn("Adjudicado ($)", format="localized", width="small"),
+            "valor": st.column_config.NumberColumn("Ejecutado ($)", format="localized", width="small"),
+            "prom6": st.column_config.NumberColumn("Prom. 6m ($)", format="localized", width="small"),
+            "fecha_agota": st.column_config.DateColumn("Agota", format="MM-YYYY", width="small"),
+            "termino": st.column_config.DateColumn("Término", format="MM-YYYY", width="small"),
+            "brecha_meses": st.column_config.NumberColumn("Brecha", format="%.1f", width="small"),
+            "riesgo": st.column_config.TextColumn("Riesgo", width="medium")})
     st.caption("Proyección lineal con el promedio mensual reciente. No modela estacionalidad ni cambios de "
-               "presupuesto; el monto adjudicado es el del paquete FIU, no el presupuesto vigente en FIN21.")
+               "presupuesto; el monto adjudicado es el del paquete FIU, no el presupuesto vigente en FIN21. "
+               "«Sobreejecutado» significa que el centro de costo ya gastó más que el monto adjudicado UFRO: "
+               "habitual cuando hay contraparte o el C.C. concentra más de un proyecto; en esos casos la "
+               "proyección no aplica y el riesgo se informa como tal.")
 
 # ================================================================ METODOLOGÍA
 else:
