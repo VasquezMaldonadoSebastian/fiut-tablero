@@ -148,7 +148,7 @@ if pag == "Resumen":
         ("Gasto clasificable", f"${mm(total_f)}", f"<i>{len(gasto_f):,}</i> movimientos · {gasto_f['rubro'].nunique()} rubros con datos".replace(",", "."), False),
         ("Cuentas de paso", f"${mm(paso_f)}", "fuera de los totales", True),
         ("Registrado bruto", f"${mm(total_f + paso_f)}", "libro Kullin, sin depurar", False),
-        ("Cartera", f"{len(proys)}", f"{n_proy} con ejecución · 122 códigos", False),
+        ("Cartera", f"{n_filas}", f"{n_proy} con ejecución · 122 códigos", False),
     ]), unsafe_allow_html=True)
 
     c1, c2 = st.columns([1.55, 1])
