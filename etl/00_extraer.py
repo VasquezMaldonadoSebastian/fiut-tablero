@@ -81,19 +81,33 @@ def copy(sql, dest, encoding=None):
         e["PGCLIENTENCODING"] = encoding
     r = subprocess.run([PSQL, "-h", DB["host"], "-p", DB["port"], "-U", DB["user"],
                         "-d", DB["dbname"], "-w", "-v", "ON_ERROR_STOP=1", "-c", q],
-                       env=e, capture_output=True, text=True)
+                       env=e, capture_output=True)
+    r.stdout = (r.stdout or b"").decode("utf-8", "replace")
+    r.stderr = (r.stderr or b"").decode("utf-8", "replace")
     if r.returncode:
         raise SystemExit(r.stderr)
     n = sum(1 for _ in open(dest, encoding="utf-8", errors="replace")) - 1
     print(f"{dest.name}: {n} filas")
 
-copy(f"""
-  SELECT replace(centro_costo,'.','') AS cc, centro_costo AS cc_raw, numero, num_linea,
-         f_ingreso::date AS fecha, cod_sitm, cod_tipmov, valor, rut_prov, glosa,
-         num_oc, ano_docume, sello_extraccion
-  FROM public.fact_movimiento_cc
-  WHERE replace(centro_costo,'.','') IN ({in_list})
-""", RAW / "movimientos.csv")
+# movimientos por COPY en Python (psycopg): evita los problemas de codificación de psql
+import psycopg
+
+sql_movs = f"""
+  SELECT replace(m.centro_costo,'.','') AS cc, m.centro_costo AS cc_raw, m.numero, m.num_linea,
+         m.f_ingreso::date AS fecha, m.cod_sitm, m.cod_tipmov, m.valor, m.rut_prov, m.glosa,
+         (SELECT d.glosa FROM public.fact_documento d WHERE d.numero = m.numero LIMIT 1) AS glosa_doc,
+         m.num_oc, m.ano_docume, m.sello_extraccion
+  FROM public.fact_movimiento_cc m
+  WHERE replace(m.centro_costo,'.','') IN ({in_list})
+"""
+with psycopg.connect(host=DB["host"], port=DB["port"], user=DB["user"], dbname=DB["dbname"],
+                     password=env["PGPASSWORD"]) as conn, conn.cursor() as cur:
+    with open(RAW / "movimientos.csv", "w", encoding="utf-8", newline="") as f:
+        with cur.copy(f"COPY ({sql_movs}) TO STDOUT WITH (FORMAT csv, HEADER true, DELIMITER ';')") as cp:
+            for data in cp:
+                f.write(bytes(data).decode("utf-8"))
+n = sum(1 for _ in open(RAW / "movimientos.csv", encoding="utf-8")) - 1
+print(f"movimientos.csv: {n} filas")
 
 copy("""
   SELECT cod_sitm, des_item, des_glosa, cod_cuenta

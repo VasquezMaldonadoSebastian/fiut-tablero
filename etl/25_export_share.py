@@ -48,7 +48,7 @@ SELECT m.cc, cp.proyecto, m.fecha, m.anio, m.mes, m.cod_tipmov, m.des_tipmov,
        m.valor,
        regexp_replace(
          regexp_replace(
-           regexp_replace(coalesce(m.glosa,''), '\b\d{1,2}\.\d{3}\.\d{3}-[\dkK]\b', 'RUT', 'g'),
+           regexp_replace(coalesce(m.glosa_doc, m.glosa, ''), '\b\d{1,2}\.\d{3}\.\d{3}-[\dkK]\b', 'RUT', 'g'),
            '\b\d{3,8}-[\dkK]\b', 'RUT', 'g'),
          '[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+', 'correo', 'g') AS glosa
 FROM org.movimientos m

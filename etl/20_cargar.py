@@ -41,7 +41,7 @@ SELECT m.cc, m.cc_raw, CAST(m.numero AS INTEGER) AS numero, CAST(m.num_linea AS 
        CAST(year(CAST(m.fecha AS DATE)) AS INTEGER) AS anio,
        CAST(month(CAST(m.fecha AS DATE)) AS INTEGER) AS mes,
        m.cod_sitm, CAST(m.cod_tipmov AS INTEGER) AS cod_tipmov, CAST(m.valor AS DOUBLE) AS valor,
-       m.rut_prov, m.glosa, m.num_oc,
+       m.rut_prov, m.glosa, m.glosa_doc, m.num_oc,
        t.des_tipmov, t.deve, t.perc, t.comp, t.pago,
        m.valor * t.deve AS devengado, m.valor * t.perc AS percibido,
        m.valor * t.comp AS comprometido, m.valor * t.pago AS pagado,
@@ -58,7 +58,7 @@ SELECT m.cc, m.cc_raw, CAST(m.numero AS INTEGER) AS numero, CAST(m.num_linea AS 
        COALESCE(tx.subitem, '') AS subitem,
        COALESCE(tx.etiqueta, '') AS etiqueta,
        i.des_item
-FROM {csv('movimientos.csv')} m
+FROM read_csv_auto('{(RAW/'movimientos.csv').as_posix()}', delim=';', header=true) m
 LEFT JOIN dim_tipo_mov t ON CAST(m.cod_tipmov AS INTEGER) = t.cod_tipmov
 LEFT JOIN taxonomia tx ON m.cod_sitm = tx.cod_sitm
 LEFT JOIN dim_item i ON m.cod_sitm = i.cod_sitm

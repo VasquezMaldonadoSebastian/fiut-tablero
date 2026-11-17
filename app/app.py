@@ -250,8 +250,11 @@ elif pag == "Registros":
         st.markdown(f'<div class="ct">Registros de gasto</div><div class="cs">una fila por movimiento · '
                     f'{len(gasto_f):,} filas con los filtros actuales</div>'.replace(",", "."),
                     unsafe_allow_html=True)
-        cols = ["fecha", "anio", "proyecto", "cc", "cod_sitm", "des_item", "glosa", "rubro", "valor"]
+        cols = ["fecha", "anio", "proyecto", "cc", "cod_sitm", "des_item", "glosa", "glosa_doc",
+                "rubro", "valor"]
         d = gasto_f[cols].sort_values("fecha", ascending=False).copy()
+        d["glosa"] = d["glosa_doc"].fillna(d["glosa"]).fillna("")
+        d = d.drop(columns=["glosa_doc"])
         d.insert(0, "n", range(1, len(d) + 1))
         st.dataframe(d, use_container_width=True, hide_index=True, height=560,
                      column_config={
