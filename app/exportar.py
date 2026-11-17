@@ -66,9 +66,11 @@ def excel_bytes(df_gasto, df_paso, filtros, tax, corte, version_tax, universo, u
         write(it.rename(columns={"cod_sitm": "Ítem", "des_item": "Nombre", "rubro": "Rubro",
                                  "subitem": "Subítem", "valor": "Monto"}), "4 Items")
 
-        det = df_gasto[["fecha", "anio", "proyecto", "cc", "cod_sitm", "des_item", "rubro",
-                        "subitem", "etiqueta", "glosa", "valor"]].copy()
-        det["glosa"] = det["glosa"].astype(str).str.slice(0, 250)
+        cols = ["fecha", "anio", "mes", "proyecto", "cc", "cod_sitm", "des_item", "rubro",
+                "subitem", "etiqueta", "glosa", "movimientos", "valor"]
+        det = df_gasto[[c for c in cols if c in df_gasto.columns]].copy()
+        if "glosa" in det.columns:
+            det["glosa"] = det["glosa"].astype(str).str.slice(0, 250)
         write(det, "5 Detalle")
 
         write(df_paso.groupby(["cod_sitm", "des_item"], as_index=False)["valor"].sum()

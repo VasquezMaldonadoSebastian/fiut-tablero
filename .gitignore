@@ -1,5 +1,8 @@
 .venv/
-data/
 __pycache__/
 *.pyc
+data/raw/
+data/*.duckdb
+data/*.xlsx
+data/_test*
 .streamlit/secrets.toml

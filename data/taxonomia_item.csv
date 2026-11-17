@@ -1,0 +1,94 @@
+﻿cod_sitm;nombre;veredicto;rubro;subitem;etiqueta;criterio;version;autor
+32800;SEC - SOLICITUD ELECTRONICA DE COMPRAS;paso;;;;Solicitud electrónica de compras: repite el monto del bien que luego se imputa al ítem real;v1 · 2026-11-17;DITT · apoyo financiero
+52001;OBLIGACIONES PENDIENTES;paso;;;;Obligaciones pendientes: documento en tránsito, se imputa al pagarse;v1 · 2026-11-17;DITT · apoyo financiero
+36201;FONDOS POR RENDIR;paso;;;;Fondos por rendir: entrega de dinero a rendir, no gasto devengado;v1 · 2026-11-17;DITT · apoyo financiero
+36202;IMPORTACIONES;paso;;;;Importaciones: cuenta de tránsito aduanero;v1 · 2026-11-17;DITT · apoyo financiero
+38901;TRANSFERENCIAS INTERNAS;paso;;;;Transferencias internas entre centros de costo;v1 · 2026-11-17;DITT · apoyo financiero
+38912;DEVOLUCION PROYECTOS SECTOR PUBLICO;paso;;;;Devolución a proyectos del sector público: reversa, no gasto;v1 · 2026-11-17;DITT · apoyo financiero
+38913;RESOLUCION REMESAS INTERNACIONALES;paso;;;;Resolución de remesas internacionales: traspaso de fondos;v1 · 2026-11-17;DITT · apoyo financiero
+83300;BOLETAS DE GARANTIA PARA GARANTIZAR PROYECTOS;paso;;;;Boletas de garantía: garantía, no gasto;v1 · 2026-11-17;DITT · apoyo financiero
+37401;SBL - SOLICITUD BECA DE ALUMNO LABORANTE;paso;;;;Solicitud de beca de alumno laborante: la ejecución está en 37400;v1 · 2026-11-17;DITT · apoyo financiero
+38801;SAEE - SOLICITUD AYUDA ECONOMICA A ESTUDIANTES;paso;;;;Solicitud de ayuda económica a estudiantes: la ejecución está en 38800;v1 · 2026-11-17;DITT · apoyo financiero
+41501;PROYECTO DE INVERSION;paso;;;;Proyecto de inversión: imputación presupuestaria, no gasto;v1 · 2026-11-17;DITT · apoyo financiero
+25300;RECUP. DE INGRESOS Y GASTOS AÑOS ANTERIORES;paso;;;;Recuperación de ingresos y gastos de años anteriores: ajuste;v1 · 2026-11-17;DITT · apoyo financiero
+32706;PRESUPUESTO CONSUMO CORRIENTE;paso;;;;Presupuesto de consumo corriente: asignación, no gasto ejecutado (decisión pendiente);v1 · 2026-11-17;DITT · apoyo financiero
+31001;HONORARIOS NO DOCENTES;gasto;Gastos en personal;Honorarios;Honorarios;Honorarios no docentes;v1 · 2026-11-17;DITT · apoyo financiero
+30300;REMUNERACIONES ACADEMICOS;gasto;Gastos en personal;Remuneraciones;Investigadores;Remuneraciones de académicos;v1 · 2026-11-17;DITT · apoyo financiero
+30600;REMUNERACIONES NO ACADEMICOS;gasto;Gastos en personal;Remuneraciones;Profesionales;Remuneraciones de no académicos;v1 · 2026-11-17;DITT · apoyo financiero
+30000;REMUNERACIONES DIRECTIVOS;gasto;Gastos en personal;Remuneraciones;Directivos;Remuneraciones de directivos;v1 · 2026-11-17;DITT · apoyo financiero
+31701;APORTE PATRONAL LEY DE ACCIDENTES DEL TRABAJO;gasto;Gastos en personal;Remuneraciones;Aportes patronales;Aporte patronal ley de accidentes del trabajo;v1 · 2026-11-17;DITT · apoyo financiero
+31702;APORTE PATRONAL SIS SEGURO INVALIDEZ Y SOBREVIVENC;gasto;Gastos en personal;Remuneraciones;Aportes patronales;Aporte patronal SIS;v1 · 2026-11-17;DITT · apoyo financiero
+31704;CAPITALIZACIÓN INDIVIDUAL;gasto;Gastos en personal;Remuneraciones;Aportes patronales;Capitalización individual;v1 · 2026-11-17;DITT · apoyo financiero
+31705;SEGURO SOCIAL EXPECTATIVA DE VIDA;gasto;Gastos en personal;Remuneraciones;Aportes patronales;Seguro social expectativa de vida;v1 · 2026-11-17;DITT · apoyo financiero
+31706;SEGURO SOCIAL RENTABILIDAD PROTEGIDA;gasto;Gastos en personal;Remuneraciones;Aportes patronales;Seguro social rentabilidad protegida;v1 · 2026-11-17;DITT · apoyo financiero
+37400;BECAS ALUMNOS LABORANTES;gasto;Gastos en personal;Incentivos;Becas;Becas de alumnos laborantes;v1 · 2026-11-17;DITT · apoyo financiero
+36301;PASAJES AEREOS INTERNACIONALES AGENCIAS DE VIAJES;gasto;Gastos de operación;Pasajes;;Pasajes aéreos internacionales, agencias;v1 · 2026-11-17;DITT · apoyo financiero
+36302;PASAJES NACIONALES LAN CHILE;gasto;Gastos de operación;Pasajes;;Pasajes nacionales LAN;v1 · 2026-11-17;DITT · apoyo financiero
+36303;PASAJES AEREOS NACIONALES SKY AIRLINES;gasto;Gastos de operación;Pasajes;;Pasajes nacionales SKY;v1 · 2026-11-17;DITT · apoyo financiero
+36304;PASAJES AEREOS NACIONALES AGENCIAS DE VIAJES;gasto;Gastos de operación;Pasajes;;Pasajes aéreos nacionales, agencias;v1 · 2026-11-17;DITT · apoyo financiero
+36305;PASAJES AEREOS INTERNACIONALES LAN CHILE;gasto;Gastos de operación;Pasajes;;Pasajes aéreos internacionales LAN;v1 · 2026-11-17;DITT · apoyo financiero
+35401;PASAJES, FLETES Y MOVILIZACION;gasto;Gastos de operación;Pasajes;Movilización;Pasajes, fletes y movilización;v1 · 2026-11-17;DITT · apoyo financiero
+31200;VIATICOS NACIONALES;gasto;Gastos de operación;Viáticos;Nacional;Viáticos nacionales;v1 · 2026-11-17;DITT · apoyo financiero
+31201;VIÁTICOS EXTRANJERO;gasto;Gastos de operación;Viáticos;Extranjero;Viáticos al extranjero;v1 · 2026-11-17;DITT · apoyo financiero
+35402;SERVICIO DE HOSPEDAJE, HOTEL Y RESTAURANT;gasto;Gastos de operación;Viáticos;Hospedaje;Hospedaje, hotel y restaurante;v1 · 2026-11-17;DITT · apoyo financiero
+32704;MATERIALES DE USO CORRIENTE;gasto;Gastos de operación;Materiales fungibles;;Materiales de uso corriente;v1 · 2026-11-17;DITT · apoyo financiero
+32726;REACTIVOS QUÍMICO DE LABORATORIOS;gasto;Gastos de operación;Materiales fungibles;Laboratorio;Reactivos químicos de laboratorio;v1 · 2026-11-17;DITT · apoyo financiero
+32728;INSUMOS DE LABORATORIOS;gasto;Gastos de operación;Materiales fungibles;Laboratorio;Insumos de laboratorio;v1 · 2026-11-17;DITT · apoyo financiero
+32727;MATERIAL DE VIDRIO PARA LABORATORIOS;gasto;Gastos de operación;Materiales fungibles;Laboratorio;Material de vidrio para laboratorio;v1 · 2026-11-17;DITT · apoyo financiero
+32742;INSUMOS CLÍNICOS;gasto;Gastos de operación;Materiales fungibles;Clínico;Insumos clínicos;v1 · 2026-11-17;DITT · apoyo financiero
+32729;INSUMOS VETERINARIOS;gasto;Gastos de operación;Materiales fungibles;Veterinario;Insumos veterinarios;v1 · 2026-11-17;DITT · apoyo financiero
+32705;HERRAMIENTAS MENORES Y ACCESORIOS;gasto;Gastos de operación;Materiales fungibles;;Herramientas menores y accesorios;v1 · 2026-11-17;DITT · apoyo financiero
+32702;TEXTILES, VESTUARIO Y CALZADO;gasto;Gastos de operación;Materiales fungibles;;Textiles, vestuario y calzado;v1 · 2026-11-17;DITT · apoyo financiero
+32703;COMBUSTIBLES Y LUBRICANTES;gasto;Gastos de operación;Materiales fungibles;;Combustibles y lubricantes;v1 · 2026-11-17;DITT · apoyo financiero
+33100;MATERIAL PARA LA DOCENCIA;gasto;Gastos de operación;Materiales fungibles;Docencia;Material para la docencia;v1 · 2026-11-17;DITT · apoyo financiero
+34800;ACCESORIOS Y PIEZAS MENORES DE COMPUTADORES;gasto;Gastos de operación;Materiales fungibles;Computación;Accesorios y piezas menores de computadores;v1 · 2026-11-17;DITT · apoyo financiero
+34700;SUMINISTROS COMPUTACIONALES;gasto;Gastos de operación;Materiales fungibles;Computación;Suministros computacionales;v1 · 2026-11-17;DITT · apoyo financiero
+35001;OTROS SERVICIOS;gasto;Gastos de operación;Gastos generales del proyecto;;Otros servicios;v1 · 2026-11-17;DITT · apoyo financiero
+35105;MANTENCIÓN E INSTALACION DE EQUIPOS Y MUEBLES;gasto;Gastos de operación;Gastos generales del proyecto;;Mantención e instalación de equipos y muebles;v1 · 2026-11-17;DITT · apoyo financiero
+35109;OTRAS MANTENCIONES Y REPARACIONES;gasto;Gastos de operación;Gastos generales del proyecto;;Otras mantenciones y reparaciones;v1 · 2026-11-17;DITT · apoyo financiero
+35106;REPARACIÓN Y MANTENCIÓN DE VEHÍCULOS;gasto;Gastos de operación;Gastos generales del proyecto;;Reparación y mantención de vehículos;v1 · 2026-11-17;DITT · apoyo financiero
+33604;OTROS CARGOS BANCARIOS;gasto;Gastos de operación;Gastos generales del proyecto;Bancarios;Otros cargos bancarios;v1 · 2026-11-17;DITT · apoyo financiero
+36001;GASTOS MENORES;gasto;Gastos de operación;Gastos generales del proyecto;;Gastos menores;v1 · 2026-11-17;DITT · apoyo financiero
+36002;GASTOS POR MOBILIARIOS AULAS;gasto;Gastos de operación;Gastos generales del proyecto;;Gastos por mobiliario de aulas;v1 · 2026-11-17;DITT · apoyo financiero
+35800;GASTOS DESPACHO CORRESPONDENCIA;gasto;Gastos de operación;Gastos generales del proyecto;;Gastos de despacho y correspondencia;v1 · 2026-11-17;DITT · apoyo financiero
+34200;ARRIENDOS DE EQUIPOS;gasto;Gastos de operación;Gastos generales del proyecto;Arriendos;Arriendos de equipos;v1 · 2026-11-17;DITT · apoyo financiero
+34300;OTROS ARRIENDOS;gasto;Gastos de operación;Gastos generales del proyecto;Arriendos;Otros arriendos;v1 · 2026-11-17;DITT · apoyo financiero
+34100;ARRIENDOS DE INMUEBLES;gasto;Gastos de operación;Gastos generales del proyecto;Arriendos;Arriendos de inmuebles;v1 · 2026-11-17;DITT · apoyo financiero
+34400;ARRIENDOS DE VEHICULOS;gasto;Gastos de operación;Gastos generales del proyecto;Arriendo de vehículo;Arriendos de vehículos;v1 · 2026-11-17;DITT · apoyo financiero
+32701;ALIMENTOS Y BEBIDAS;gasto;Gastos de operación;Gastos generales del proyecto;Alimentación;Alimentos y bebidas;v1 · 2026-11-17;DITT · apoyo financiero
+33200;GASTOS DE INVESTIGACIÓN;gasto;Gastos de operación;Gastos generales del proyecto;;Gastos de investigación;v1 · 2026-11-17;DITT · apoyo financiero
+32001;ENERGÍA ELÉCTRICA;gasto;Gastos de operación;Gastos generales del proyecto;Servicios básicos;Energía eléctrica;v1 · 2026-11-17;DITT · apoyo financiero
+32100;AGUA;gasto;Gastos de operación;Gastos generales del proyecto;Servicios básicos;Agua;v1 · 2026-11-17;DITT · apoyo financiero
+32200;GAS;gasto;Gastos de operación;Gastos generales del proyecto;Servicios básicos;Gas;v1 · 2026-11-17;DITT · apoyo financiero
+32300;TELÉFONOS Y FAX;gasto;Gastos de operación;Gastos generales del proyecto;Servicios básicos;Teléfonos y fax;v1 · 2026-11-17;DITT · apoyo financiero
+35020;SERVICIOS DE ASESORIAS;gasto;Gastos de operación;Subcontratos;Asesorías;Servicios de asesoría;v1 · 2026-11-17;DITT · apoyo financiero
+33501;PUBLICIDAD Y DIFUSIÓN;gasto;Gastos de operación;Seminarios, publicaciones y difusión;;Publicidad y difusión;v1 · 2026-11-17;DITT · apoyo financiero
+33503;SERVICIO DE IMPRESIÓN Y REPRODUCCIÓN;gasto;Gastos de operación;Seminarios, publicaciones y difusión;;Servicio de impresión y reproducción;v1 · 2026-11-17;DITT · apoyo financiero
+33504;OTRAS PUBLICACIONES;gasto;Gastos de operación;Seminarios, publicaciones y difusión;;Otras publicaciones;v1 · 2026-11-17;DITT · apoyo financiero
+33505;PAGO DE TASAS PUBLICACIONES DE INVESTIGACION;gasto;Gastos de operación;Seminarios, publicaciones y difusión;;Pago de tasas de publicaciones de investigación;v1 · 2026-11-17;DITT · apoyo financiero
+35700;SUSCRIP. DE REV. , DIARIOS Y TEXT. DE USO EN OF.;gasto;Gastos de operación;Seminarios, publicaciones y difusión;Suscripciones;Suscripción de revistas y diarios;v1 · 2026-11-17;DITT · apoyo financiero
+40301;LICENCIAS COMPUTACIONALES;gasto;Gastos de operación;Software;Licencias;Licencias computacionales;v1 · 2026-11-17;DITT · apoyo financiero
+40302;SOFTWARE;gasto;Gastos de operación;Software;;Software;v1 · 2026-11-17;DITT · apoyo financiero
+34600;SERVICIOS COMPUTACIONALES;gasto;Gastos de operación;Software;Servicios TI;Servicios computacionales;v1 · 2026-11-17;DITT · apoyo financiero
+40207;EQUIPOS DE LABORATORIO;gasto;Equipos;;Laboratorio;Equipos de laboratorio;v1 · 2026-11-17;DITT · apoyo financiero
+40208;MAQUINAS Y EQUIPOS;gasto;Equipos;;;Máquinas y equipos;v1 · 2026-11-17;DITT · apoyo financiero
+40201;EQUIPOS COMPUTACIONALES;gasto;Equipos;;Computación;Equipos computacionales;v1 · 2026-11-17;DITT · apoyo financiero
+40202;IMPRESORAS;gasto;Equipos;;Computación;Impresoras;v1 · 2026-11-17;DITT · apoyo financiero
+40203;SCANNER;gasto;Equipos;;Computación;Scanner;v1 · 2026-11-17;DITT · apoyo financiero
+40300;OTROS BIENES INVENTARIABLES;gasto;Equipos;;Bienes inventariables;Otros bienes inventariables;v1 · 2026-11-17;DITT · apoyo financiero
+40205;MUEBLES DE OFICINA;gasto;Equipos;;Mobiliario;Muebles de oficina;v1 · 2026-11-17;DITT · apoyo financiero
+40206;MUEBLES DE LABORATORIOS;gasto;Equipos;;Mobiliario;Muebles de laboratorio;v1 · 2026-11-17;DITT · apoyo financiero
+40218;MUEBLES Y EQUIPOS CLÍNICAS;gasto;Equipos;;Mobiliario;Muebles y equipos de clínicas;v1 · 2026-11-17;DITT · apoyo financiero
+40209;REPUESTOS MÁQUINAS Y EQUIPOS;gasto;Equipos;;Repuestos;Repuestos de máquinas y equipos;v1 · 2026-11-17;DITT · apoyo financiero
+41001;VEHICULOS;gasto;Equipos;;Vehículos;Vehículos;v1 · 2026-11-17;DITT · apoyo financiero
+35101;PINTURA DE EDIFICIOS;gasto;Infraestructura;;Obras;Pintura de edificios;v1 · 2026-11-17;DITT · apoyo financiero
+35123;INSTALACIONES FIJAS Y ACCESORIOS;gasto;Infraestructura;;Obras;Instalaciones fijas y accesorios;v1 · 2026-11-17;DITT · apoyo financiero
+35107;REPARACIÓN Y MANTENCIÓN DE INMUEBLES;gasto;Infraestructura;;Mantención;Reparación y mantención de inmuebles;v1 · 2026-11-17;DITT · apoyo financiero
+35108;MANTENCIÓN Y REPARACIÓN DE OFICINAS;gasto;Infraestructura;;Mantención;Mantención y reparación de oficinas;v1 · 2026-11-17;DITT · apoyo financiero
+35118;OTRAS MANTENCIONES Y REPARACIONES DOCENCIA;gasto;Infraestructura;;Mantención;Otras mantenciones y reparaciones de docencia;v1 · 2026-11-17;DITT · apoyo financiero
+38900;OTRAS TRANSFERENCIAS;gasto;Otras transferencias;;Transferencias;Otras transferencias (rubro propio por decisión DITT);v1 · 2026-11-17;DITT · apoyo financiero
+38904;TRANSFERENCIAS CONTRAPARTE PROY. F. TERCEROS;gasto;Otras transferencias;;Contraparte;Transferencias a contraparte de proyectos con financiamiento de terceros;v1 · 2026-11-17;DITT · apoyo financiero
+38914;AYUDA A TERCEROS;gasto;Otras transferencias;;Ayuda a terceros;Ayuda a terceros;v1 · 2026-11-17;DITT · apoyo financiero
+38915;REMESAS EMPRENDEDORES;gasto;Otras transferencias;;Emprendedores;Remesas a emprendedores;v1 · 2026-11-17;DITT · apoyo financiero
+38916;TRANSFERENCIAS OTRAS UNIVERSIDADES;gasto;Otras transferencias;;Universidades;Transferencias a otras universidades;v1 · 2026-11-17;DITT · apoyo financiero
+38800;APORTES PARA ACTIVIDADES ESTUDIANTILES;gasto;Otras transferencias;;Estudiantes;Aportes para actividades estudiantiles;v1 · 2026-11-17;DITT · apoyo financiero

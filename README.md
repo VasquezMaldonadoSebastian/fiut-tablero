@@ -69,3 +69,21 @@ docs/    METODOLOGIA.md · TABLA_EQUIVALENCIA.md
 - El ETL es de solo lectura sobre `fin21_local`.
 - Ningún total por tipo de gasto se publica sin que la suma de rubros cuadre con el libro.
 - Los códigos de centro de costo se leen como texto y se normalizan solo para el cruce.
+
+## Despliegue en Streamlit Community Cloud
+
+La app funciona en dos modos según qué base encuentre:
+
+- `data/fiu_fiut.duckdb` (local, con RUT y glosas) → **modo detalle completo**.
+- `data/share/fiu_fiut_share.duckdb` (en el repo, 2,3 MB) → **modo agregado**: una fila por C.C., mes e
+  ítem; sin documento, proveedor ni glosa. Es la que se usa en línea.
+
+Para desplegar: `share.streamlit.io` → *New app* → repo `VasquezMaldonadoSebastian/fiut-tablero`,
+rama `main`, archivo `app/app.py`. `requirements.txt` va en la raíz.
+
+Para regenerar la base en línea después de un refresco:
+
+```
+.venv\Scripts\python.exe etl\25_export_share.py
+git add data/share/fiu_fiut_share.duckdb && git commit -m "base en linea" && git push
+```

@@ -4,6 +4,7 @@
 Streamlit sobre un archivo DuckDB local (data/fiu_fiut.duckdb).
 Sin conexión a bases institucionales: el ETL es el único que lee fin21_local.
 """
+import os
 import sys
 from datetime import date, datetime
 from pathlib import Path
@@ -15,7 +16,10 @@ import pandas as pd
 import streamlit as st
 
 BASE = Path(__file__).resolve().parent.parent
-DB = BASE / "data" / "fiu_fiut.duckdb"
+FULL = BASE / "data" / "fiu_fiut.duckdb"
+SHARE = BASE / "data" / "share" / "fiu_fiut_share.duckdb"
+DB = Path(os.environ["FIU_DB"]) if os.environ.get("FIU_DB") else (FULL if FULL.exists() else SHARE)
+MODO = "detalle" if DB == FULL else "share"
 CORTE = "16-11-2026"
 VERSION_TAX = "v1 · 2026-11-17"
 
@@ -80,7 +84,10 @@ def q(sql, _mtime=None):
 
 
 MTIME = DB.stat().st_mtime
-n_filas = q("SELECT count(*) n FROM proyectos", MTIME)["n"][0]
+try:
+    n_filas = int(q("SELECT valor FROM meta WHERE clave='filas_paquete'", MTIME)["valor"][0])
+except Exception:
+    n_filas = q("SELECT count(*) n FROM proyectos", MTIME)["n"][0]
 
 # ---------------------------------------------------------------- cartera
 proys = q("SELECT * FROM dim_proyecto ORDER BY adjudicado DESC NULLS LAST", MTIME)
@@ -133,6 +140,10 @@ total_f = float(gasto_f["valor"].sum())
 paso_f = float(q(f"SELECT coalesce(sum(valor),0) v FROM v_paso{W}", MTIME)["v"][0])
 
 
+def n_movs(df):
+    return int(df["movimientos"].sum()) if "movimientos" in df.columns else len(df)
+
+
 def kpis(vals):
     html = '<div class="kpis">'
     for lab, val, det, mute in vals:
@@ -145,7 +156,7 @@ def kpis(vals):
 if pag == "Resumen":
     n_proy = gasto_f["proyecto"].nunique()
     st.markdown(kpis([
-        ("Gasto clasificable", f"${mm(total_f)}", f"<i>{len(gasto_f):,}</i> movimientos · {gasto_f['rubro'].nunique()} rubros con datos".replace(",", "."), False),
+        ("Gasto clasificable", f"${mm(total_f)}", f"<i>{n_movs(gasto_f):,}</i> movimientos · {gasto_f['rubro'].nunique()} rubros con datos".replace(",", "."), False),
         ("Cuentas de paso", f"${mm(paso_f)}", "fuera de los totales", True),
         ("Registrado bruto", f"${mm(total_f + paso_f)}", "libro Kullin, sin depurar", False),
         ("Cartera", f"{n_filas}", f"{n_proy} con ejecución · 122 códigos", False),
@@ -222,28 +233,48 @@ if pag == "Resumen":
 
 # ================================================================ REGISTROS
 elif pag == "Registros":
-    st.markdown(f'<div class="ct">Registros de gasto</div><div class="cs">una fila por movimiento · '
-                f'{len(gasto_f):,} filas con los filtros actuales</div>'.replace(",", "."),
-                unsafe_allow_html=True)
-    cols = ["fecha", "anio", "mes", "proyecto", "cc", "cod_sitm", "des_item", "rubro",
-            "subitem", "etiqueta", "glosa", "valor"]
-    d = gasto_f[cols].sort_values("fecha", ascending=False).copy()
-    d.insert(0, "n", range(1, len(d) + 1))
-    st.dataframe(d, use_container_width=True, hide_index=True, height=560,
-                 column_config={
-                     "fecha": st.column_config.DateColumn("Fecha", format="DD-MM-YYYY"),
-                     "valor": st.column_config.NumberColumn("Monto ($)", format="localized"),
-                     "cc": st.column_config.TextColumn("C.C."),
-                     "des_item": st.column_config.TextColumn("Ítem contable", width="medium"),
-                     "rubro": st.column_config.TextColumn("Rubro", width="small"),
-                     "glosa": st.column_config.TextColumn("Glosa", width="medium"),
-                 })
-    st.caption(f"Total filtrado: {clp(total_f)} · cuentas de paso excluidas: {clp(paso_f)}")
+    if MODO == "detalle":
+        st.markdown(f'<div class="ct">Registros de gasto</div><div class="cs">una fila por movimiento · '
+                    f'{len(gasto_f):,} filas con los filtros actuales</div>'.replace(",", "."),
+                    unsafe_allow_html=True)
+        cols = ["fecha", "anio", "mes", "proyecto", "cc", "cod_sitm", "des_item", "rubro",
+                "subitem", "etiqueta", "glosa", "valor"]
+        d = gasto_f[cols].sort_values("fecha", ascending=False).copy()
+        d.insert(0, "n", range(1, len(d) + 1))
+        st.dataframe(d, use_container_width=True, hide_index=True, height=560,
+                     column_config={
+                         "fecha": st.column_config.DateColumn("Fecha", format="DD-MM-YYYY"),
+                         "valor": st.column_config.NumberColumn("Monto ($)", format="localized"),
+                         "cc": st.column_config.TextColumn("C.C."),
+                         "des_item": st.column_config.TextColumn("Ítem contable", width="medium"),
+                         "rubro": st.column_config.TextColumn("Rubro", width="small"),
+                         "glosa": st.column_config.TextColumn("Glosa", width="medium"),
+                     })
+    else:
+        st.markdown('<div class="ct">Registros de gasto</div>'
+                    '<div class="cs">versión en línea: una fila por centro de costo, mes e ítem '
+                    '(sin documento, proveedor ni glosa)</div>', unsafe_allow_html=True)
+        d = (gasto_f.groupby(["anio", "mes", "proyecto", "cc", "cod_sitm", "des_item", "rubro",
+                              "subitem", "etiqueta"], as_index=False)
+             .agg(movimientos=("movimientos", "sum"), valor=("valor", "sum"))
+             .sort_values(["anio", "mes"], ascending=False))
+        st.dataframe(d, use_container_width=True, hide_index=True, height=560,
+                     column_config={
+                         "valor": st.column_config.NumberColumn("Monto ($)", format="localized"),
+                         "anio": st.column_config.NumberColumn("Año", width="small"),
+                         "mes": st.column_config.NumberColumn("Mes", width="small"),
+                         "des_item": st.column_config.TextColumn("Ítem contable", width="medium"),
+                         "rubro": st.column_config.TextColumn("Rubro", width="small"),
+                         "movimientos": st.column_config.NumberColumn("Movs.", width="small"),
+                     })
+    st.caption(f"Total filtrado: {clp(total_f)} · cuentas de paso excluidas: {clp(paso_f)} · "
+               f"modo {'detalle completo' if MODO == 'detalle' else 'agregado (en línea)'}")
 
 # ================================================================ PROYECTOS
 elif pag == "Proyectos":
+    agg_movs = ("movimientos", "sum") if "movimientos" in gasto_f.columns else ("valor", "count")
     d = gasto_f.groupby(["proyecto", "proyecto_nombre"], as_index=False).agg(
-        ejecutado=("valor", "sum"), movimientos=("valor", "count"))
+        ejecutado=("valor", "sum"), movimientos=agg_movs)
     d = d.merge(proys[["codigo", "adjudicado", "financiador", "inicio", "termino"]],
                 left_on="proyecto", right_on="codigo", how="left")
     d["saldo"] = d["adjudicado"] - d["ejecutado"]
@@ -287,8 +318,11 @@ elif pag == "Ítems":
 
 # ================================================================ DECLARADO
 elif pag == "Declarado":
-    decl = q(f"""SELECT proyecto, anio, sum(monto_num) monto, count(*) lineas
-                 FROM declarado GROUP BY 1,2 ORDER BY 1,2""", MTIME)
+    sql_decl = ("""SELECT proyecto, anio, sum(monto_num) monto, count(*) lineas
+                   FROM declarado GROUP BY 1,2 ORDER BY 1,2""" if MODO == "detalle" else
+                """SELECT proyecto, anio, sum(monto) monto, sum(lineas) lineas
+                   FROM declarado GROUP BY 1,2 ORDER BY 1,2""")
+    decl = q(sql_decl, MTIME)
     tot_d = float(decl["monto"].sum())
     reg = gasto_f.groupby("proyecto", as_index=False)["valor"].sum()
     dp = decl.groupby("proyecto", as_index=False)["monto"].sum().merge(reg, on="proyecto", how="left")
@@ -412,4 +446,4 @@ st.sidebar.download_button(
                      f"{n_filas} proyectos · {len(ccs)} centros de costo"),
     file_name=fname, mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     use_container_width=True)
-st.sidebar.caption(f"{len(gasto_f):,} movimientos · {clp(total_f)}".replace(",", "."))
+st.sidebar.caption(f"{n_movs(gasto_f):,} movimientos · {clp(total_f)}".replace(",", "."))
